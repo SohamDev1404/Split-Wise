@@ -151,12 +151,6 @@ See [`shared/schema.ts`](shared/schema.ts) and [`migrations/`](migrations/) for 
 
 ---
 
-## Demo
-
-- [Demo Video (optional)](link-to-video)
-
----
-
 ## Known Limitations
 
 - Only supports group-based settlements (not per-expense custom splits)
