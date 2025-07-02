@@ -29,6 +29,9 @@ export default function Dashboard() {
   
   const [editingExpense, setEditingExpense] = useState<{id: string, data: UpdateExpense} | null>(null);
 
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState("monthly");
+
   // Queries
   const { data: expenses, isLoading: expensesLoading } = useQuery({
     queryKey: ["/api/expenses"],
@@ -96,6 +99,19 @@ export default function Dashboard() {
     },
   });
 
+  const settleSettlementMutation = useMutation({
+    mutationFn: api.settleSettlement,
+    onSuccess: () => {
+      toast({ title: "Success", description: "Settlement marked as paid" });
+      queryClient.invalidateQueries({ queryKey: ["/api/settlements"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/balances"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/people"] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to mark as paid", variant: "destructive" });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Parse split_with names from the input
@@ -133,7 +149,7 @@ export default function Dashboard() {
           <div className="flex items-center h-16">
             <h1 className="text-2xl font-bold text-primary flex items-center">
               <Receipt className="mr-2 h-8 w-8" />
-              SplitWise API
+              SplitWise
             </h1>
           </div>
         </div>
@@ -221,6 +237,26 @@ export default function Dashboard() {
                           <SelectItem value="Other">📦 Other</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="recurring"
+                        checked={isRecurring}
+                        onChange={e => setIsRecurring(e.target.checked)}
+                      />
+                      <Label htmlFor="recurring" className="text-gray-800 text-base font-normal">Make this a recurring expense</Label>
+                      {isRecurring && (
+                        <Select value={recurringFrequency} onValueChange={setRecurringFrequency}>
+                          <SelectTrigger className="w-32 ml-2">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                     <Button type="submit" className="w-full" disabled={createExpenseMutation.isPending}>
                       {createExpenseMutation.isPending ? "Adding..." : "Add Expense"}
@@ -397,8 +433,18 @@ export default function Dashboard() {
                             </div>
                             <div className="text-sm text-gray-600">Settlement transaction</div>
                           </div>
-                          <div className="text-xl font-bold text-red-600">
-                            ₹{settlement.amount}
+                          <div className="flex items-center gap-4">
+                            <div className="text-xl font-bold text-red-600">
+                              ₹{settlement.amount}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => settleSettlementMutation.mutate(settlement)}
+                              disabled={settleSettlementMutation.isPending}
+                            >
+                              Paid
+                            </Button>
                           </div>
                         </div>
                       </div>

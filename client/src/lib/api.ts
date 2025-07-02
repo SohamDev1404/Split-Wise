@@ -49,4 +49,10 @@ export const api = {
     const data = await response.json();
     return data.data;
   },
+
+  async settleSettlement(settlement: { from: string; to: string; amount: number }): Promise<any> {
+    const response = await apiRequest("POST", "/api/settlements/settle", settlement);
+    const data = await response.json();
+    return data;
+  },
 };

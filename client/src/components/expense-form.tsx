@@ -19,6 +19,8 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [splitType, setSplitType] = useState<"equal" | "percentage" | "exact">("equal");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState("monthly");
 
   const { data: people } = useQuery({
     queryKey: ["/api/people"],
@@ -63,6 +65,18 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
   });
 
   const onSubmit = (data: InsertExpense) => {
+    if (isRecurring) {
+      // TODO: Replace with actual API call to create recurring expense
+      toast({
+        title: "Recurring Expense (Demo)",
+        description: `Would create a ${recurringFrequency} recurring expense!`,
+      });
+      reset();
+      setIsRecurring(false);
+      setRecurringFrequency("monthly");
+      onSuccess?.();
+      return;
+    }
     createExpenseMutation.mutate(data);
   };
 
@@ -145,6 +159,27 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
             <SelectItem value="exact">Exact Amount</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="recurring"
+          checked={isRecurring}
+          onChange={e => setIsRecurring(e.target.checked)}
+        />
+        <Label htmlFor="recurring" className="text-gray-800 text-base font-normal">Make this a recurring expense</Label>
+        {isRecurring && (
+          <Select value={recurringFrequency} onValueChange={setRecurringFrequency}>
+            <SelectTrigger className="w-32 ml-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="monthly">Monthly</SelectItem>
+              <SelectItem value="weekly">Weekly</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <Button

@@ -107,10 +107,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/people", async (req, res) => {
     try {
       const people = await storage.getPeople();
+      const names = people.map(person => person.name);
       res.json({
         success: true,
-        data: people,
-        message: "People retrieved successfully",
+        data: names
       });
     } catch (error) {
       handleError(res, error, "Failed to fetch people");
@@ -156,6 +156,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       handleError(res, error, "Failed to fetch statistics");
+    }
+  });
+
+  // POST /api/settlements/settle - Mark a settlement as paid
+  app.post("/api/settlements/settle", async (req, res) => {
+    try {
+      const { from, to, amount } = req.body;
+      if (!from || !to || !amount) {
+        return res.status(400).json({ success: false, message: "Missing from, to, or amount" });
+      }
+      // Create a settlement expense: from pays to
+      const expense = await storage.createExpense({
+        amount: amount.toString(),
+        description: `Settlement: ${from} paid ${to}`,
+        paid_by: from,
+        split_with: [to],
+        split_type: "exact",
+        split_details: { [to]: amount },
+        category: "Other",
+      });
+      res.status(201).json({ success: true, data: expense, message: "Settlement marked as paid" });
+    } catch (error) {
+      handleError(res, error, "Failed to mark settlement as paid");
+    }
+  });
+
+  // GET /api/settlements/settled - List all settled transactions
+  app.get("/api/settlements/settled", async (req, res) => {
+    try {
+      const allExpenses = await storage.getExpenses();
+      const settled = allExpenses.filter(exp => exp.description && exp.description.startsWith("Settlement:"));
+      res.json({ success: true, data: settled, message: "Settled transactions retrieved successfully" });
+    } catch (error) {
+      handleError(res, error, "Failed to fetch settled transactions");
     }
   });
 
