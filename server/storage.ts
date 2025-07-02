@@ -17,6 +17,18 @@ export interface IStorage {
   getDashboardStats(): Promise<DashboardStats>;
 }
 
+// Add utility functions for normalization and money rounding
+function normalizeName(name: string): string {
+  return name.trim().toLowerCase();
+}
+function displayName(name: string): string {
+  // Capitalize first letter of each word
+  return name.trim().replace(/\b\w/g, c => c.toUpperCase());
+}
+function roundMoney(value: number): number {
+  return Number(value.toFixed(2));
+}
+
 export class DatabaseStorage implements IStorage {
   async createExpense(expenseData: InsertExpense): Promise<Expense> {
     const [expense] = await db
@@ -70,25 +82,24 @@ export class DatabaseStorage implements IStorage {
     // Initialize all people (from paid_by and split_with)
     for (const expense of allExpenses) {
       // Add person who paid (normalize name)
-      const normalizedPaidBy = expense.paid_by.trim().toLowerCase();
-      const displayPaidBy = expense.paid_by.trim();
+      const normalizedPaidBy = normalizeName(expense.paid_by);
+      const shownPaidBy = displayName(expense.paid_by);
       if (!peopleMap.has(normalizedPaidBy)) {
         peopleMap.set(normalizedPaidBy, {
-          name: displayPaidBy,
+          name: shownPaidBy,
           total_paid: 0,
           total_owed: 0,
           balance: 0,
         });
       }
-      
       // Add people from split_with array
       if (expense.split_with && expense.split_with.length > 0) {
         for (const personName of expense.split_with) {
-          const normalizedName = personName.trim().toLowerCase();
-          const displayName = personName.trim();
+          const normalizedName = normalizeName(personName);
+          const shownName = displayName(personName);
           if (normalizedName && !peopleMap.has(normalizedName)) {
             peopleMap.set(normalizedName, {
-              name: displayName,
+              name: shownName,
               total_paid: 0,
               total_owed: 0,
               balance: 0,
@@ -97,46 +108,67 @@ export class DatabaseStorage implements IStorage {
         }
       }
     }
-
     if (peopleMap.size === 0) return [];
 
     // Calculate totals for each expense
     for (const expense of allExpenses) {
       const amount = parseFloat(expense.amount);
-      const normalizedPaidBy = expense.paid_by.trim().toLowerCase();
+      const normalizedPaidBy = normalizeName(expense.paid_by);
       const payer = peopleMap.get(normalizedPaidBy)!;
-      
-      // Add to what the payer paid
       payer.total_paid += amount;
-      
+
       // Get all people involved in this expense (payer + split_with)
-      const allInvolvedPeople = [expense.paid_by.trim()];
-      if (expense.split_with && expense.split_with.length > 0) {
-        allInvolvedPeople.push(...expense.split_with.filter(name => name.trim()));
-      }
-      
-      // Remove duplicates and empty names (normalize for comparison)
-      const uniquePeopleSplit = Array.from(new Set(allInvolvedPeople.map(name => name.trim().toLowerCase()).filter(name => name)));
-      
-      // Calculate share per person for equal split
-      const sharePerPerson = amount / uniquePeopleSplit.length;
-      
-      // Add to what each person owes (including the payer)
-      for (const normalizedPersonName of uniquePeopleSplit) {
-        const person = peopleMap.get(normalizedPersonName);
-        if (person) {
-          person.total_owed += sharePerPerson;
+      const allInvolvedPeople = [expense.paid_by, ...(expense.split_with || [])];
+      const uniquePeopleSplit = Array.from(new Set(allInvolvedPeople.map(normalizeName).filter(Boolean)));
+
+      // Handle split types
+      if (expense.split_type === 'equal' || !expense.split_type) {
+        // Equal split
+        const sharePerPerson = amount / uniquePeopleSplit.length;
+        for (const normalizedPersonName of uniquePeopleSplit) {
+          const person = peopleMap.get(normalizedPersonName);
+          if (person) {
+            person.total_owed += sharePerPerson;
+          }
+        }
+      } else if (expense.split_type === 'percentage' && expense.split_details) {
+        // Percentage split
+        const details = expense.split_details as Record<string, number | string>;
+        for (const normalizedPersonName of uniquePeopleSplit) {
+          const person = peopleMap.get(normalizedPersonName);
+          if (person) {
+            // Find the original name in split_with or paid_by
+            let origName = allInvolvedPeople.find(n => normalizeName(n) === normalizedPersonName) || '';
+            let percent = 0;
+            if (details && typeof details === 'object' && origName in details) {
+              percent = Number(details[origName] || 0);
+            }
+            person.total_owed += (amount * percent) / 100;
+          }
+        }
+      } else if (expense.split_type === 'exact' && expense.split_details) {
+        // Exact split
+        const details = expense.split_details as Record<string, number | string>;
+        for (const normalizedPersonName of uniquePeopleSplit) {
+          const person = peopleMap.get(normalizedPersonName);
+          if (person) {
+            // Find the original name in split_with or paid_by
+            let origName = allInvolvedPeople.find(n => normalizeName(n) === normalizedPersonName) || '';
+            let exact = 0;
+            if (details && typeof details === 'object' && origName in details) {
+              exact = Number(details[origName] || 0);
+            }
+            person.total_owed += exact;
+          }
         }
       }
     }
 
-    // Calculate balances
+    // Calculate balances and round
     for (const person of Array.from(peopleMap.values())) {
-      person.balance = person.total_paid - person.total_owed;
-      // Round to 2 decimal places
-      person.total_paid = Math.round(person.total_paid * 100) / 100;
-      person.total_owed = Math.round(person.total_owed * 100) / 100;
-      person.balance = Math.round(person.balance * 100) / 100;
+      person.total_paid = roundMoney(person.total_paid);
+      person.total_owed = roundMoney(person.total_owed);
+      person.balance = roundMoney(person.total_paid - person.total_owed);
     }
 
     return Array.from(peopleMap.values());

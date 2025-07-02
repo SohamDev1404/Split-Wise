@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertExpenseSchema, type InsertExpense } from "@shared/schema";
@@ -21,6 +21,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
   const [splitType, setSplitType] = useState<"equal" | "percentage" | "exact">("equal");
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringFrequency, setRecurringFrequency] = useState("monthly");
+  const [splitDetails, setSplitDetails] = useState<Record<string, number>>({});
 
   const { data: people } = useQuery({
     queryKey: ["/api/people"],
@@ -32,6 +33,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<InsertExpense>({
     resolver: zodResolver(insertExpenseSchema),
@@ -39,6 +41,22 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
       split_type: "equal",
     },
   });
+
+  // Compute participants
+  const paidBy = watch("paid_by")?.trim();
+  const splitWith = watch("split_with") || [];
+  const participants = Array.from(new Set([paidBy, ...splitWith].filter(Boolean)));
+
+  // Reset splitDetails when participants or splitType changes
+  useEffect(() => {
+    setSplitDetails((prev) => {
+      const updated: Record<string, number> = {};
+      for (const name of participants) {
+        updated[name] = prev[name] ?? 0;
+      }
+      return updated;
+    });
+  }, [participants, splitType]);
 
   const createExpenseMutation = useMutation({
     mutationFn: api.createExpense,
@@ -66,7 +84,6 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
 
   const onSubmit = (data: InsertExpense) => {
     if (isRecurring) {
-      // TODO: Replace with actual API call to create recurring expense
       toast({
         title: "Recurring Expense (Demo)",
         description: `Would create a ${recurringFrequency} recurring expense!`,
@@ -77,7 +94,33 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
       onSuccess?.();
       return;
     }
-    createExpenseMutation.mutate(data);
+    let finalData: any = { ...data };
+    if (splitType === "percentage" || splitType === "exact") {
+      finalData.split_details = splitDetails;
+      // Validation
+      if (splitType === "percentage") {
+        const total = Object.values(splitDetails).reduce((a, b) => a + Number(b), 0);
+        if (Math.abs(total - 100) > 0.01) {
+          toast({
+            title: "Error",
+            description: "Percentages must sum to 100%.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } else if (splitType === "exact") {
+        const total = Object.values(splitDetails).reduce((a, b) => a + Number(b), 0);
+        if (Math.abs(total - Number(data.amount)) > 0.01) {
+          toast({
+            title: "Error",
+            description: "Exact amounts must sum to the total amount.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
+    createExpenseMutation.mutate(finalData);
   };
 
   return (
@@ -160,6 +203,37 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Dynamic split details input */}
+      {(splitType === "percentage" || splitType === "exact") && participants.length > 0 && (
+        <div className="border rounded p-3 bg-gray-50">
+          <Label className="mb-2 block">
+            {splitType === "percentage"
+              ? "Enter percentage for each participant (total 100%)"
+              : "Enter exact amount for each participant (total = amount)"}
+          </Label>
+          {participants.map((name) => (
+            <div key={name} className="flex items-center space-x-2 mt-2">
+              <span className="w-32">{name}</span>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={splitDetails[name] ?? ""}
+                onChange={e => {
+                  setSplitDetails(sd => ({
+                    ...sd,
+                    [name]: Number(e.target.value)
+                  }));
+                }}
+                className="w-32"
+                placeholder={splitType === "percentage" ? "Percent" : "Amount"}
+              />
+              <span>{splitType === "percentage" ? "%" : "₹"}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center space-x-2">
         <input

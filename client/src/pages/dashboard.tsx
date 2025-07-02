@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,9 @@ export default function Dashboard() {
 
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringFrequency, setRecurringFrequency] = useState("monthly");
+
+  const [splitType, setSplitType] = useState<"equal" | "percentage" | "exact">("equal");
+  const [splitDetails, setSplitDetails] = useState<Record<string, number | string>>({});
 
   // Queries
   const { data: expenses, isLoading: expensesLoading } = useQuery({
@@ -112,6 +115,25 @@ export default function Dashboard() {
     },
   });
 
+  // Compute participants for split
+  const paidBy = newExpense.paid_by.trim();
+  const splitWithNames = splitWithInput
+    .split(',')
+    .map(name => name.trim())
+    .filter(name => name.length > 0);
+  const participants = Array.from(new Set([paidBy, ...splitWithNames].filter(Boolean)));
+
+  // Reset splitDetails when participants or splitType changes
+  useEffect(() => {
+    setSplitDetails((prev) => {
+      const updated: Record<string, number | string> = {};
+      for (const name of participants) {
+        updated[name] = prev[name] ?? 0;
+      }
+      return updated;
+    });
+  }, [participants.join(','), splitType]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Parse split_with names from the input
@@ -119,12 +141,41 @@ export default function Dashboard() {
       .split(',')
       .map(name => name.trim())
       .filter(name => name.length > 0);
-    
-    const expenseData = {
+    const expenseData: any = {
       ...newExpense,
-      split_with: splitWithNames
+      split_with: splitWithNames,
+      split_type: splitType,
     };
-    
+    if (splitType === "percentage" || splitType === "exact") {
+      // Convert all values to numbers for backend
+      const splitDetailsNumbers: Record<string, number> = {};
+      for (const key in splitDetails) {
+        splitDetailsNumbers[key] = Number(splitDetails[key]) || 0;
+      }
+      expenseData.split_details = splitDetailsNumbers;
+      // Validation
+      if (splitType === "percentage") {
+        const total = Object.values(splitDetailsNumbers).reduce((a, b) => a + Number(b), 0);
+        if (Math.abs(total - 100) > 0.01) {
+          toast({
+            title: "Error",
+            description: "Percentages must sum to 100%.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } else if (splitType === "exact") {
+        const total = Object.values(splitDetailsNumbers).reduce((a, b) => a + Number(b), 0);
+        if (Math.abs(total - Number(newExpense.amount)) > 0.01) {
+          toast({
+            title: "Error",
+            description: "Exact amounts must sum to the total amount.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
     createExpenseMutation.mutate(expenseData);
   };
 
@@ -238,6 +289,60 @@ export default function Dashboard() {
                         </SelectContent>
                       </Select>
                     </div>
+                    {/* Split Type Selection */}
+                    <div>
+                      <Label htmlFor="split_type">Split Type</Label>
+                      <Select value={splitType} onValueChange={(value) => setSplitType(value as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select split type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="equal">Equal Split</SelectItem>
+                          <SelectItem value="percentage">Percentage Split</SelectItem>
+                          <SelectItem value="exact">Exact Amount</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {/* Dynamic split details input */}
+                    {(splitType === "percentage" || splitType === "exact") && participants.length > 0 && (
+                      <div className="border rounded p-3 bg-gray-50">
+                        <Label className="mb-2 block">
+                          {splitType === "percentage"
+                            ? "Enter percentage for each participant (total 100%)"
+                            : "Enter exact amount for each participant (total = amount)"}
+                        </Label>
+                        {participants.map((name) => (
+                          <div key={name} className="flex items-center space-x-2 mt-2">
+                            <span className="w-32">{name}</span>
+                            <Input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={splitDetails[name] === 0 ? "0" : splitDetails[name] === undefined ? "" : splitDetails[name]}
+                              onFocus={e => {
+                                if (splitDetails[name] === 0) {
+                                  setSplitDetails(sd => ({ ...sd, [name]: "" }));
+                                }
+                              }}
+                              onBlur={e => {
+                                if (e.target.value === "" || e.target.value === undefined) {
+                                  setSplitDetails(sd => ({ ...sd, [name]: 0 }));
+                                }
+                              }}
+                              onChange={e => {
+                                setSplitDetails(sd => ({
+                                  ...sd,
+                                  [name]: e.target.value
+                                }));
+                              }}
+                              className="w-32"
+                              placeholder={splitType === "percentage" ? "Percent" : "Amount"}
+                            />
+                            <span>{splitType === "percentage" ? "%" : "₹"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
