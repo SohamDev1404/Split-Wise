@@ -1,0 +1,275 @@
+{
+  "info": {
+    "name": "SplitWise - Expense Tracker API",
+    "description": "Production-ready Split Expense Tracker API with comprehensive test scenarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://your-replit-name.replit.app/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Expense Management",
+      "item": [
+        {
+          "name": "Add Expense - Dinner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"600\",\n  \"description\": \"Dinner at restaurant\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"equal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Expense - Groceries",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"450\",\n  \"description\": \"Groceries\",\n  \"paid_by\": \"Sanket\",\n  \"split_type\": \"equal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Expense - Petrol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"300\",\n  \"description\": \"Petrol\",\n  \"paid_by\": \"Om\",\n  \"split_type\": \"equal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Expense - Movie Tickets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"500\",\n  \"description\": \"Movie Tickets\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"percentage\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Expense - Pizza",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"280\",\n  \"description\": \"Pizza\",\n  \"paid_by\": \"Sanket\",\n  \"split_type\": \"equal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Expenses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/expenses"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Expense - Change Petrol to ₹350",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses/UPDATE_WITH_ACTUAL_ID",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"350\",\n  \"description\": \"Petrol - Updated\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Expense - Remove Pizza",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/expenses/DELETE_WITH_ACTUAL_ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Settlements & People",
+      "item": [
+        {
+          "name": "Get All People",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/people"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Balances",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/balances"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Settlement Summary",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/settlements"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/stats"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases & Validation",
+      "item": [
+        {
+          "name": "Add Expense - Invalid (negative amount)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"-50\",\n  \"description\": \"Invalid expense\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"equal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Expense - Invalid (empty description)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"100\",\n  \"description\": \"\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"equal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Expense - Invalid (missing paid_by)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"100\",\n  \"description\": \"Missing paid_by\",\n  \"split_type\": \"equal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Non-existent Expense",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/expenses/00000000-0000-0000-0000-000000000000",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"200\",\n  \"description\": \"Updated expense\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Non-existent Expense",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/expenses/00000000-0000-0000-0000-000000000000"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Balances - With No Expenses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/balances"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
