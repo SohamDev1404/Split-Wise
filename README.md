@@ -1,6 +1,7 @@
 Base URL: https://split-wise-hhst.onrender.com
 Postman API Testing : https://www.postman.com/telecoms-cosmonaut-64114015/workspace/personal-workspace/collection/37412145-596e1436-2fcf-4b4e-92b1-a0a7a12a871b?action=share&creator=37412145
 NeonDB Connection string : postgresql://neondb_owner:npg_q9Qy6geAdvNO@ep-withered-fire-a8hlvk1g-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require
+Gist Github URL : https://gist.github.com/SohamDev1404/ac9eae5c9f2d855002921506106d8d4f
 
 
 # SplitWise - Expense Tracker Backend
@@ -99,12 +100,14 @@ The application will be available at `http://localhost:5000`
 - Body:
   ```json
   {
-    "amount": "60.00",
-    "description": "Dinner at restaurant",
-    "paid_by": "Shantanu",
-    "split_type": "equal"
-  }
-  ```
+  "amount": "4000",
+  "description": "Shopping",
+  "paid_by": "Soham",
+  "split_with": ["Anup", "Anagha"],
+  "split_type": "equal",
+  "is_recurring": false
+}
+
 
 **PUT /api/expenses/:id**
 - Update expense
