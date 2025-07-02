@@ -107,10 +107,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/people", async (req, res) => {
     try {
       const people = await storage.getPeople();
-      const names = people.map(person => person.name);
       res.json({
         success: true,
-        data: names
+        data: people,
+        message: "People retrieved successfully"
       });
     } catch (error) {
       handleError(res, error, "Failed to fetch people");
