@@ -1,0 +1,208 @@
+I need you to create a fully functional, production-ready backend for a Split Expense Tracker App, similar to Splitwise, deployed on Replit, using the following exact specifications. Along with the project, I also want a step-by-step written guide explaining how to:
+
+✅ Setup the project from scratch
+✅ Run the project locally and on Replit
+✅ Test the API endpoints
+✅ Deploy the app on Replit with public URLs
+✅ Setup and test the Postman collection
+✅ Use the app effectively
+
+✅ Project Overview
+A backend system to manage group expenses fairly.
+
+Tracks expenses, calculates who owes whom, and provides settlement summaries.
+
+Inspired by apps like Splitwise or Google Pay Bill Split.
+
+🛠️ Required Tech Stack
+Backend: Node.js with Express.js
+
+Database: PostgreSQL (Supabase, Railway, or simulated with in-memory if Replit persistence is unavailable)
+
+Deployment: Replit-hosted API accessible via public URL
+
+Testing: Include a ready Postman Collection with test cases
+
+📦 Required Features
+1. Expense Management
+Add new expense with:
+
+amount (positive number)
+
+description (non-empty string)
+
+paid_by (existing or new person)
+
+People are automatically tracked when mentioned.
+
+View all expenses with details.
+
+Edit or delete expenses.
+
+Allow split types:
+
+Equal split (default)
+
+Percentage split
+
+Exact amount split (optional for bonus points)
+
+2. Settlement Calculations
+Show how much each person has paid vs. their fair share.
+
+Show optimized transactions (minimize number of payments required).
+
+Display clear summary:
+
+Balances per person (owes/owed)
+
+Suggested settlements (who pays whom and how much)
+
+3. Data Validation & Error Handling
+Amounts must be positive.
+
+Required fields must be provided.
+
+Graceful error handling for:
+
+Negative amounts
+
+Empty descriptions
+
+Missing paid_by
+
+Invalid updates/deletes
+
+Use proper HTTP status codes and consistent JSON responses.
+
+📑 API Endpoints to Implement
+Expense Management:
+Method	Route	Description
+GET	/expenses	List all expenses
+POST	/expenses	Add new expense
+PUT	/expenses/:id	Update expense
+DELETE	/expenses/:id	Delete expense
+
+Settlement & People:
+Method	Route	Description
+GET	/settlements	Optimized settlement summary
+GET	/balances	Show each person’s balance
+GET	/people	List all people (derived from expenses)
+
+🗂️ Database Schema Suggestion
+Table: expenses
+
+Column	Type	Notes
+id	UUID/Serial	Primary Key
+amount	DECIMAL	Must be positive
+description	TEXT	Required
+paid_by	TEXT	Person's name, required
+created_at	TIMESTAMP	Default now()
+
+Optional: Table for people if not derived from expenses
+Optional: Store splits inside expense as JSON for flexibility
+
+🌟 Optional Extra Features (Bonus)
+Recurring expenses (e.g., monthly rent)
+
+Expense categories (Food, Travel, Utilities, etc.)
+
+Monthly spending summaries
+
+Simple HTML interface to test visually
+
+✅ Deployment Requirements
+Host the working API on Replit, accessible via a public URL.
+
+If database persistence isn't possible, use in-memory storage but structure code for easy DB swap.
+
+Provide clear instructions on how to test.
+
+🧪 Testing Requirements
+Provide a Postman Collection (exported JSON) with:
+
+Working examples for all endpoints
+
+Pre-filled test data:
+
+People: Shantanu, Sanket, Om
+
+Expenses:
+
+Dinner ₹600 (Shantanu)
+
+Groceries ₹450 (Sanket)
+
+Petrol ₹300 (Om)
+
+Movie ₹500 (Shantanu)
+
+Pizza ₹280 (Sanket)
+
+Edge Cases:
+
+Negative amount
+
+Empty description
+
+Missing paid_by
+
+Non-existent expense updates/deletes
+
+Getting balances when no expenses exist
+
+📂 Deliverables
+Full project code
+
+Public Replit deployment link
+
+Public Postman Collection link
+
+README with:
+
+Setup instructions
+
+API documentation
+
+Logic explanation for settlement calculations
+
+Known limitations or assumptions
+
+Complete written step-by-step guide explaining:
+
+How to clone the project
+
+How to install dependencies
+
+How to set up the database (locally or cloud-based like Supabase)
+
+How to run the project locally
+
+How to deploy to Replit
+
+How to test the APIs using Postman
+
+How to import and use the provided Postman Collection
+
+How the settlement logic works
+
+Common mistakes and debugging tips
+
+Future improvements suggestions
+
+⚠️ Important Reminders
+Do NOT hardcode localhost URLs in Postman collection—use Replit’s deployed URL.
+
+Ensure clean, readable, and commented code.
+
+Floating-point precision for money must be handled properly.
+
+Names in expenses must be consistent (case-insensitive ideally).
+
+🏁 Final Notes
+Focus on perfect core functionality before adding bonus features.
+
+All essential features must work reliably on Replit with no local dependency.
+
+The guide should be clear enough for someone new to easily set up and run the project end-to-end.
+
