@@ -60,7 +60,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(expenses)
       .where(eq(expenses.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getPeople(): Promise<Person[]> {
@@ -101,7 +101,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Calculate balances
-    for (const person of peopleMap.values()) {
+    for (const person of Array.from(peopleMap.values())) {
       person.balance = person.total_paid - person.total_owed;
       // Round to 2 decimal places
       person.total_paid = Math.round(person.total_paid * 100) / 100;

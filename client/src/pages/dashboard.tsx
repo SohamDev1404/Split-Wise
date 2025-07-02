@@ -5,11 +5,18 @@ import { ExpenseForm } from "@/components/expense-form";
 import { ExpenseList } from "@/components/expense-list";
 import { BalanceSummary } from "@/components/balance-summary";
 import { SettlementRecommendations } from "@/components/settlement-recommendations";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Dashboard() {
   const [showAddExpense, setShowAddExpense] = useState(false);
+  const balanceRef = useRef<HTMLDivElement>(null);
+  const settlementRef = useRef<HTMLDivElement>(null);
+  const expenseRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,15 +74,24 @@ export default function Dashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <button className="w-full text-left px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={() => scrollToSection(settlementRef)}
+                  className="w-full text-left px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
                   <span className="text-primary mr-3">🧮</span>
                   <span className="font-medium">Calculate Settlements</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={() => scrollToSection(balanceRef)}
+                  className="w-full text-left px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
                   <span className="text-primary mr-3">👥</span>
                   <span className="font-medium">View All People</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={() => scrollToSection(expenseRef)}
+                  className="w-full text-left px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
                   <span className="text-primary mr-3">📊</span>
                   <span className="font-medium">Expense Report</span>
                 </button>
@@ -85,9 +101,15 @@ export default function Dashboard() {
 
           {/* Right Column - Expense List and Settlements */}
           <div className="lg:col-span-2 space-y-8">
-            <ExpenseList />
-            <BalanceSummary />
-            <SettlementRecommendations />
+            <div ref={expenseRef}>
+              <ExpenseList />
+            </div>
+            <div ref={balanceRef}>
+              <BalanceSummary />
+            </div>
+            <div ref={settlementRef}>
+              <SettlementRecommendations />
+            </div>
           </div>
         </div>
       </div>

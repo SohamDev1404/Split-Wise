@@ -105,21 +105,21 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
         <Label htmlFor="paid_by" className="block text-sm font-medium text-gray-700 mb-2">
           Paid By
         </Label>
-        <Select onValueChange={(value) => setValue("paid_by", value)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select person or enter new name" />
-          </SelectTrigger>
-          <SelectContent>
-            {people?.map((person) => (
-              <SelectItem key={person.name} value={person.name}>
-                {person.name}
-              </SelectItem>
-            ))}
-            <SelectItem value="Shantanu">Shantanu</SelectItem>
-            <SelectItem value="Sanket">Sanket</SelectItem>
-            <SelectItem value="Om">Om</SelectItem>
-          </SelectContent>
-        </Select>
+        <Input
+          id="paid_by"
+          placeholder="Enter person's name"
+          {...register("paid_by")}
+          className="w-full"
+          list="people-list"
+        />
+        <datalist id="people-list">
+          {people?.map((person) => (
+            <option key={`person-${person.name}`} value={person.name} />
+          ))}
+          <option key="default-shantanu" value="Shantanu" />
+          <option key="default-sanket" value="Sanket" />
+          <option key="default-om" value="Om" />
+        </datalist>
         {errors.paid_by && (
           <p className="text-sm text-destructive mt-1">{errors.paid_by.message}</p>
         )}
