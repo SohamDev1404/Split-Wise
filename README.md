@@ -178,19 +178,31 @@ See [`shared/schema.ts`](shared/schema.ts) and [`migrations/`](migrations/) for 
 -- If anyone’s balance becomes zero, remove them from the list.
 - 5.Repeat until everyone’s balance is zero.
 
-graph TD
-    Start([Start])
-    ListAllPeople[List all people]
-    CalculateBalances[Calculate balances]
-    SplitGroups[Split into Creditors & Debtors]
-    LoopCheck[While both exist]
-    PickTop[Pick top Debtor & Creditor]
-    Pay[Debtor pays Creditor]
-    UpdateBalances[Update balances]
-    RemoveZero[Remove anyone with zero balance]
-    RepeatCheck[Repeat]
-    AllZero[All balances zero?]
-    End([End: All debts settled!])
+[Start]
+|
+[List all people]
+|
+[Calculate balances]
+|
+[Split into Creditors & Debtors]
+|
+[While both exist]
+|
+[Pick top Debtor & Creditor]
+|
+[Debtor pays Creditor]
+|
+[Update balances]
+|
+[Remove anyone with zero balance]
+|
+[Repeat]
+|
+[All balances zero?]
+|
+Yes
+|
+[End: All debts settled!]
 
     Start --> ListAllPeople --> CalculateBalances --> SplitGroups --> LoopCheck
     LoopCheck -->|Yes| PickTop --> Pay --> UpdateBalances --> RemoveZero --> RepeatCheck --> LoopCheck
