@@ -166,43 +166,35 @@ See [`shared/schema.ts`](shared/schema.ts) and [`migrations/`](migrations/) for 
 - How does the app figure out who pays whom?
 - 1.List all people in the group.
 - 2.Calculate each person’s balance:
-Balance = Total paid minus total owed.
-Split into two groups:
-Creditors: People who are owed money (positive balance).
-Debtors: People who owe money (negative balance).
-While there are both creditors and debtors:
-Pick the person who owes the most (debtor).
-Pick the person who is owed the most (creditor).
-The debtor pays the creditor the smaller of what they owe or what the creditor is owed.
-Update both balances.
-If anyone’s balance becomes zero, remove them from the list.
-Repeat until everyone’s balance is zero.
+-- Balance = Total paid minus total owed.
+- 3.Split into two groups:
+-- Creditors: People who are owed money (positive balance).
+-- Debtors: People who owe money (negative balance).
+- 4.While there are both creditors and debtors:
+-- Pick the person who owes the most (debtor).
+-- Pick the person who is owed the most (creditor).
+-- The debtor pays the creditor the smaller of what they owe or what the creditor is owed.
+-- Update both balances.
+-- If anyone’s balance becomes zero, remove them from the list.
+- 5.Repeat until everyone’s balance is zero.
 
-[Start]
-   |
-[List all people]
-   |
-[Calculate balances]
-   |
-[Split into Creditors & Debtors]
-   |
-[While both exist]
-   |
-[Pick top Debtor & Creditor]
-   |
-[Debtor pays Creditor]
-   |
-[Update balances]
-   |
-[Remove anyone with zero balance]
-   |
-[Repeat]
-   |
-[All balances zero?]
-   |
-  Yes
-   |
-[End: All debts settled!]
+graph TD
+    Start([Start])
+    ListAllPeople[List all people]
+    CalculateBalances[Calculate balances]
+    SplitGroups[Split into Creditors & Debtors]
+    LoopCheck[While both exist]
+    PickTop[Pick top Debtor & Creditor]
+    Pay[Debtor pays Creditor]
+    UpdateBalances[Update balances]
+    RemoveZero[Remove anyone with zero balance]
+    RepeatCheck[Repeat]
+    AllZero[All balances zero?]
+    End([End: All debts settled!])
+
+    Start --> ListAllPeople --> CalculateBalances --> SplitGroups --> LoopCheck
+    LoopCheck -->|Yes| PickTop --> Pay --> UpdateBalances --> RemoveZero --> RepeatCheck --> LoopCheck
+    LoopCheck -->|No| AllZero --> End
 
 
 ### Response Format
