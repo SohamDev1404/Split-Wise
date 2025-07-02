@@ -114,7 +114,15 @@ This approach minimizes the total number of transactions required.
 
 ## Changelog
 
-- July 02, 2025. Initial setup
+- July 02, 2025: Initial setup
+- July 02, 2025: Added "With you and:" field for splitting expenses with multiple people
+- July 02, 2025: Fixed duplicate name issues with case-insensitive name handling
+- July 02, 2025: Added expense categories (Food, Travel, Utilities, Entertainment, Other)
+- July 02, 2025: Added comprehensive Analytics tab with:
+  - Category-wise spending breakdown with percentages
+  - Top 5 highest expenses
+  - Monthly spending summaries
+  - Enhanced expense display showing categories
 
 ## User Preferences
 

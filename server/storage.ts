@@ -69,10 +69,12 @@ export class DatabaseStorage implements IStorage {
 
     // Initialize all people (from paid_by and split_with)
     for (const expense of allExpenses) {
-      // Add person who paid
-      if (!peopleMap.has(expense.paid_by)) {
-        peopleMap.set(expense.paid_by, {
-          name: expense.paid_by,
+      // Add person who paid (normalize name)
+      const normalizedPaidBy = expense.paid_by.trim().toLowerCase();
+      const displayPaidBy = expense.paid_by.trim();
+      if (!peopleMap.has(normalizedPaidBy)) {
+        peopleMap.set(normalizedPaidBy, {
+          name: displayPaidBy,
           total_paid: 0,
           total_owed: 0,
           balance: 0,
@@ -82,9 +84,11 @@ export class DatabaseStorage implements IStorage {
       // Add people from split_with array
       if (expense.split_with && expense.split_with.length > 0) {
         for (const personName of expense.split_with) {
-          if (personName.trim() && !peopleMap.has(personName.trim())) {
-            peopleMap.set(personName.trim(), {
-              name: personName.trim(),
+          const normalizedName = personName.trim().toLowerCase();
+          const displayName = personName.trim();
+          if (normalizedName && !peopleMap.has(normalizedName)) {
+            peopleMap.set(normalizedName, {
+              name: displayName,
               total_paid: 0,
               total_owed: 0,
               balance: 0,
@@ -99,26 +103,27 @@ export class DatabaseStorage implements IStorage {
     // Calculate totals for each expense
     for (const expense of allExpenses) {
       const amount = parseFloat(expense.amount);
-      const payer = peopleMap.get(expense.paid_by)!;
+      const normalizedPaidBy = expense.paid_by.trim().toLowerCase();
+      const payer = peopleMap.get(normalizedPaidBy)!;
       
       // Add to what the payer paid
       payer.total_paid += amount;
       
       // Get all people involved in this expense (payer + split_with)
-      const allInvolvedPeople = [expense.paid_by];
+      const allInvolvedPeople = [expense.paid_by.trim()];
       if (expense.split_with && expense.split_with.length > 0) {
         allInvolvedPeople.push(...expense.split_with.filter(name => name.trim()));
       }
       
-      // Remove duplicates and empty names
-      const uniquePeopleSplit = Array.from(new Set(allInvolvedPeople.map(name => name.trim()).filter(name => name)));
+      // Remove duplicates and empty names (normalize for comparison)
+      const uniquePeopleSplit = Array.from(new Set(allInvolvedPeople.map(name => name.trim().toLowerCase()).filter(name => name)));
       
       // Calculate share per person for equal split
       const sharePerPerson = amount / uniquePeopleSplit.length;
       
       // Add to what each person owes (including the payer)
-      for (const personName of uniquePeopleSplit) {
-        const person = peopleMap.get(personName);
+      for (const normalizedPersonName of uniquePeopleSplit) {
+        const person = peopleMap.get(normalizedPersonName);
         if (person) {
           person.total_owed += sharePerPerson;
         }

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Receipt, Plus, Edit, Trash2 } from "lucide-react";
 import type { InsertExpense, UpdateExpense } from "@shared/schema";
@@ -20,7 +21,8 @@ export default function Dashboard() {
     description: "",
     paid_by: "",
     split_with: [],
-    split_type: "equal"
+    split_type: "equal",
+    category: "Other"
   });
   
   const [splitWithInput, setSplitWithInput] = useState("");
@@ -53,7 +55,7 @@ export default function Dashboard() {
     mutationFn: api.createExpense,
     onSuccess: () => {
       toast({ title: "Success", description: "Expense added successfully" });
-      setNewExpense({ amount: "", description: "", paid_by: "", split_with: [], split_type: "equal" });
+      setNewExpense({ amount: "", description: "", paid_by: "", split_with: [], split_type: "equal", category: "Other" });
       setSplitWithInput("");
       queryClient.invalidateQueries({ queryKey: ["/api/expenses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/people"] });
@@ -139,11 +141,12 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="expenses" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="people">People</TabsTrigger>
             <TabsTrigger value="balances">Balances</TabsTrigger>
             <TabsTrigger value="settlements">Settlements</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Expenses Tab */}
@@ -204,6 +207,21 @@ export default function Dashboard() {
                         Separate multiple names with commas (e.g., "John, Sarah, Mike")
                       </p>
                     </div>
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={newExpense.category} onValueChange={(value) => setNewExpense({...newExpense, category: value as any})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Food">🍔 Food</SelectItem>
+                          <SelectItem value="Travel">✈️ Travel</SelectItem>
+                          <SelectItem value="Utilities">⚡ Utilities</SelectItem>
+                          <SelectItem value="Entertainment">🎮 Entertainment</SelectItem>
+                          <SelectItem value="Other">📦 Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <Button type="submit" className="w-full" disabled={createExpenseMutation.isPending}>
                       {createExpenseMutation.isPending ? "Adding..." : "Add Expense"}
                     </Button>
@@ -255,7 +273,7 @@ export default function Dashboard() {
                               <div>
                                 <div className="font-medium">{expense.description}</div>
                                 <div className="text-sm text-gray-600">
-                                  ₹{expense.amount} • Paid by {expense.paid_by}
+                                  ₹{expense.amount} • Paid by {expense.paid_by} • {expense.category || 'Other'}
                                   {expense.split_with && expense.split_with.length > 0 && (
                                     <div className="text-xs text-gray-500 mt-1">
                                       Split with: {expense.split_with.join(', ')}
@@ -396,6 +414,119 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Category Breakdown */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Spending by Category</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {expenses && expenses.length > 0 ? (
+                    <div className="space-y-4">
+                      {Object.entries(
+                        expenses.reduce((acc, expense) => {
+                          const category = expense.category || 'Other';
+                          const amount = parseFloat(expense.amount);
+                          acc[category] = (acc[category] || 0) + amount;
+                          return acc;
+                        }, {} as Record<string, number>)
+                      )
+                      .sort(([,a], [,b]) => b - a)
+                      .map(([category, total]) => {
+                        const totalAmount = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+                        const percentage = ((total / totalAmount) * 100).toFixed(1);
+                        return (
+                          <div key={category} className="flex justify-between items-center p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">{category}</div>
+                              <div className="text-sm text-gray-600">{percentage}% of total spending</div>
+                            </div>
+                            <div className="text-lg font-bold">₹{total.toFixed(2)}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      No expenses yet. Add some expenses to see analytics!
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Top Expenses */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Expenses</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {expenses && expenses.length > 0 ? (
+                    <div className="space-y-3">
+                      {[...expenses]
+                        .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
+                        .slice(0, 5)
+                        .map((expense) => (
+                          <div key={expense.id} className="flex justify-between items-center p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">{expense.description}</div>
+                              <div className="text-sm text-gray-600">
+                                {expense.category || 'Other'} • Paid by {expense.paid_by}
+                              </div>
+                            </div>
+                            <div className="text-lg font-bold">₹{expense.amount}</div>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      No expenses yet. Add some expenses to see top expenses!
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Monthly Summary */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Monthly Spending Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {expenses && expenses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {Object.entries(
+                        expenses.reduce((acc, expense) => {
+                          const date = new Date(expense.created_at);
+                          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                          const monthName = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                          if (!acc[monthKey]) {
+                            acc[monthKey] = { name: monthName, total: 0, count: 0 };
+                          }
+                          acc[monthKey].total += parseFloat(expense.amount);
+                          acc[monthKey].count += 1;
+                          return acc;
+                        }, {} as Record<string, { name: string; total: number; count: number }>)
+                      )
+                      .sort(([a], [b]) => b.localeCompare(a))
+                      .map(([key, data]) => (
+                        <div key={key} className="p-4 border rounded-lg text-center">
+                          <div className="font-medium">{data.name}</div>
+                          <div className="text-2xl font-bold text-blue-600">₹{data.total.toFixed(2)}</div>
+                          <div className="text-sm text-gray-600">{data.count} expense{data.count !== 1 ? 's' : ''}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      No expenses yet. Add some expenses to see monthly summaries!
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
