@@ -1,3 +1,8 @@
+Base URL: https://split-wise-hhst.onrender.com
+Postman API Testing : https://www.postman.com/telecoms-cosmonaut-64114015/workspace/personal-workspace/collection/37412145-596e1436-2fcf-4b4e-92b1-a0a7a12a871b?action=share&creator=37412145
+NeonDB Connection string : postgresql://neondb_owner:npg_q9Qy6geAdvNO@ep-withered-fire-a8hlvk1g-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require
+
+
 # SplitWise - Expense Tracker Backend
 
 A production-ready Split Expense Tracker backend API built with Node.js, Express, and PostgreSQL. Similar to Splitwise, this application helps groups split expenses fairly and calculates optimized settlements.
@@ -12,14 +17,6 @@ A production-ready Split Expense Tracker backend API built with Node.js, Express
 - **Data Validation**: Comprehensive input validation and error handling
 - **Real-time Updates**: Live dashboard with expense statistics
 
-### Settlement Logic
-The application uses a greedy algorithm to minimize the number of transactions needed to settle all balances:
-1. Calculate each person's net balance (total paid - total owed)
-2. Separate creditors (positive balance) and debtors (negative balance)
-3. Match the largest creditor with the largest debtor
-4. Settle the minimum of their absolute balances
-5. Repeat until all balances are settled
-
 ## 🛠️ Tech Stack
 
 - **Backend**: Node.js with Express.js
@@ -27,7 +24,6 @@ The application uses a greedy algorithm to minimize the number of transactions n
 - **Frontend**: React with TypeScript, Tailwind CSS, shadcn/ui
 - **State Management**: TanStack Query (React Query)
 - **Validation**: Zod schemas
-- **Deployment**: Replit
 
 ## 📦 Installation & Setup
 
@@ -37,48 +33,58 @@ The application uses a greedy algorithm to minimize the number of transactions n
 
 ### Local Development
 
+## Local Setup
+
 1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd splitwise-backend
+   ```sh
+   git clone <your-repo-url>
+   cd Split-Wise
    ```
 
 2. **Install dependencies**
-   ```bash
+   ```sh
    npm install
+   cd client
+   npm install
+   cd ..
    ```
 
-3. **Set up environment variables**
-   The application uses the following environment variables (already configured in Replit):
-   - `DATABASE_URL` - PostgreSQL connection string
-   - `NODE_ENV` - Environment (development/production)
+3. **Configure environment variables**
+   - Copy `.env.example` to `.env` and set your NeonDB connection string:
+     ```
+     DATABASE_URL=postgres://<user>:<password>@<host>/<db>
+     ```
 
-4. **Push database schema**
-   ```bash
+4. **Run database migrations**
+   ```sh
    npm run db:push
    ```
 
-5. **Start the development server**
-   ```bash
+5. **Seed the database**
+   ```sh
+   npm run seed
+   ```
+
+6. **Start the backend**
+   ```sh
    npm run dev
    ```
 
+7. **Start the frontend**
+   ```sh
+   cd client
+   npm run dev
+   ```
+
+---
+
 The application will be available at `http://localhost:5000`
 
-### Deployment on Replit
-
-1. **Fork this Repl or import the code**
-2. **The database is already configured** - DATABASE_URL is provided as a secret
-3. **Click Run** - The application will automatically:
-   - Install dependencies
-   - Push the database schema
-   - Start the server on port 5000
 
 ## 📚 API Documentation
 
 ### Base URL
 - Local: `http://localhost:5000/api`
-- Replit: `https://your-replit-name.replit.app/api`
 
 ### Endpoints
 
@@ -122,9 +128,40 @@ The application will be available at `http://localhost:5000`
 - Get optimized settlement recommendations
 - Returns: Array of { from, to, amount } objects
 
+**GET /api/settlements/settled**
+-— List all settled transactions
+
 **GET /api/stats**
 - Get dashboard statistics
 - Returns: { totalExpenses, totalAmount, pendingSettlements }
+
+  ## Database Schema
+
+See [`shared/schema.ts`](shared/schema.ts) and [`migrations/`](migrations/) for schema and migration scripts.
+
+---
+
+## Deployment
+
+- Backend: [https://split-wise-hhst.onrender.com](https://split-wise-hhst.onrender.com)
+- Database: NeonDB (cloud-hosted)
+
+---
+
+## Demo
+
+- [Demo Video (optional)](link-to-video)
+
+---
+
+## Known Limitations
+
+- Only supports group-based settlements (not per-expense custom splits)
+- No authentication (public API)
+- Floating point rounding may cause minor discrepancies
+
+---
+
 
 ### Response Format
 All API responses follow this format:
@@ -134,3 +171,4 @@ All API responses follow this format:
   "data": { ... },
   "message": "Operation completed successfully"
 }
+
