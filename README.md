@@ -162,20 +162,21 @@ See [`shared/schema.ts`](shared/schema.ts) and [`migrations/`](migrations/) for 
 
 ---
 
-Settlement Calculation Logic (Simple Explanation)
-1.List all people in the group.
-2.Calculate each person’s balance:
----How much they paid minus how much they owe.
-3.Split into two groups:
---Creditors: People who are owed money (positive balance).
---Debtors: People who owe money (negative balance).
-4.While there are both creditors and debtors:
---Pick the person who owes the most (debtor).
---Pick the person who is owed the most (creditor).
---The debtor pays the creditor the smaller of what they owe or what the creditor is owed.
---Update both balances.
---If anyone’s balance becomes zero, remove them from the list.
-5.Repeat until everyone’s balance is zero.
+**🧮 Settlement Calculation Logic**
+- How does the app figure out who pays whom?
+- 1.List all people in the group.
+- 2.Calculate each person’s balance:
+Balance = Total paid minus total owed.
+Split into two groups:
+Creditors: People who are owed money (positive balance).
+Debtors: People who owe money (negative balance).
+While there are both creditors and debtors:
+Pick the person who owes the most (debtor).
+Pick the person who is owed the most (creditor).
+The debtor pays the creditor the smaller of what they owe or what the creditor is owed.
+Update both balances.
+If anyone’s balance becomes zero, remove them from the list.
+Repeat until everyone’s balance is zero.
 
 [Start]
    |
