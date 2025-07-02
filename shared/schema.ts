@@ -7,6 +7,7 @@ export const expenses = pgTable("expenses", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   description: text("description").notNull(),
   paid_by: text("paid_by").notNull(),
+  split_with: text("split_with").array().default([]).notNull(), // Array of people to split with
   split_type: text("split_type").notNull().default("equal"),
   split_details: json("split_details"), // For percentage/exact splits
   created_at: timestamp("created_at").defaultNow().notNull(),
@@ -23,6 +24,7 @@ export const insertExpenseSchema = createInsertSchema(expenses, {
   ),
   description: z.string().min(1, "Description is required"),
   paid_by: z.string().min(1, "Paid by is required"),
+  split_with: z.array(z.string()).default([]),
   split_type: z.enum(["equal", "percentage", "exact"]).default("equal"),
 }).omit({
   id: true,

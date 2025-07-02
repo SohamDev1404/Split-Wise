@@ -19,8 +19,11 @@ export default function Dashboard() {
     amount: "",
     description: "",
     paid_by: "",
+    split_with: [],
     split_type: "equal"
   });
+  
+  const [splitWithInput, setSplitWithInput] = useState("");
   
   const [editingExpense, setEditingExpense] = useState<{id: string, data: UpdateExpense} | null>(null);
 
@@ -50,7 +53,8 @@ export default function Dashboard() {
     mutationFn: api.createExpense,
     onSuccess: () => {
       toast({ title: "Success", description: "Expense added successfully" });
-      setNewExpense({ amount: "", description: "", paid_by: "", split_type: "equal" });
+      setNewExpense({ amount: "", description: "", paid_by: "", split_with: [], split_type: "equal" });
+      setSplitWithInput("");
       queryClient.invalidateQueries({ queryKey: ["/api/expenses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/people"] });
       queryClient.invalidateQueries({ queryKey: ["/api/balances"] });
@@ -92,7 +96,18 @@ export default function Dashboard() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createExpenseMutation.mutate(newExpense);
+    // Parse split_with names from the input
+    const splitWithNames = splitWithInput
+      .split(',')
+      .map(name => name.trim())
+      .filter(name => name.length > 0);
+    
+    const expenseData = {
+      ...newExpense,
+      split_with: splitWithNames
+    };
+    
+    createExpenseMutation.mutate(expenseData);
   };
 
   const handleUpdate = (e: React.FormEvent) => {
@@ -177,6 +192,18 @@ export default function Dashboard() {
                         required
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="split_with">With you and:</Label>
+                      <Input
+                        id="split_with"
+                        value={splitWithInput}
+                        onChange={(e) => setSplitWithInput(e.target.value)}
+                        placeholder="Enter names or email addresses"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Separate multiple names with commas (e.g., "John, Sarah, Mike")
+                      </p>
+                    </div>
                     <Button type="submit" className="w-full" disabled={createExpenseMutation.isPending}>
                       {createExpenseMutation.isPending ? "Adding..." : "Add Expense"}
                     </Button>
@@ -229,6 +256,11 @@ export default function Dashboard() {
                                 <div className="font-medium">{expense.description}</div>
                                 <div className="text-sm text-gray-600">
                                   ₹{expense.amount} • Paid by {expense.paid_by}
+                                  {expense.split_with && expense.split_with.length > 0 && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Split with: {expense.split_with.join(', ')}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               <div className="flex gap-2">
