@@ -1,120 +1,75 @@
 {
   "info": {
     "name": "SplitWise - Expense Tracker API",
-    "description": "Production-ready Split Expense Tracker API with comprehensive test scenarios",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "description": "Production-ready Split Expense Tracker API similar to Splitwise. Features expense management, automatic settlement calculations, balance tracking, and comprehensive analytics.\n\n**Key Features:**\n- Expense CRUD operations with categories\n- Automatic people tracking from expenses\n- Smart settlement recommendations (optimized transactions)\n- Real-time balance calculations\n- Category-wise analytics\n\n**Test Data:**\nThe API comes pre-populated with sample data for testing:\n- People: Shantanu, Sanket, Om\n- Various expenses across different categories\n- Realistic settlement scenarios\n\n**Base URL:** {{BASE_URL}}\n\n**Quick Start:**\n1. Import this collection\n2. Set BASE_URL variable to the deployed API URL\n3. Run the requests to see the system in action",
+    "version": "1.0.0",
+    "contact": {
+      "name": "SplitWise API",
+      "description": "Split Expense Tracker API for managing group expenses and settlements"
+    }
+  },
+  "auth": {
+    "type": "noauth"
   },
   "variable": [
     {
-      "key": "baseUrl",
-      "value": "https://your-replit-name.replit.app/api",
-      "type": "string"
+      "key": "BASE_URL",
+      "value": "https://your-replit-app.replit.app",
+      "type": "string",
+      "description": "Base URL of the deployed API"
     }
   ],
   "item": [
     {
-      "name": "Expense Management",
+      "name": "📊 Dashboard Stats",
       "item": [
         {
-          "name": "Add Expense - Dinner",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"600\",\n  \"description\": \"Dinner at restaurant\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"equal\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Add Expense - Groceries",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"450\",\n  \"description\": \"Groceries\",\n  \"paid_by\": \"Sanket\",\n  \"split_type\": \"equal\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Add Expense - Petrol",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"300\",\n  \"description\": \"Petrol\",\n  \"paid_by\": \"Om\",\n  \"split_type\": \"equal\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Add Expense - Movie Tickets",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"500\",\n  \"description\": \"Movie Tickets\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"percentage\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Add Expense - Pizza",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"280\",\n  \"description\": \"Pizza\",\n  \"paid_by\": \"Sanket\",\n  \"split_type\": \"equal\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "List All Expenses",
+          "name": "Get Dashboard Stats",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/expenses"
+            "header": [],
+            "url": "{{BASE_URL}}/api/dashboard-stats",
+            "description": "Get overview statistics including total expenses, total amount, and pending settlements count."
+          },
+          "response": []
+        }
+      ],
+      "description": "Dashboard overview and statistics"
+    },
+    {
+      "name": "💰 Expenses",
+      "item": [
+        {
+          "name": "Get All Expenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{BASE_URL}}/api/expenses",
+            "description": "Retrieve all expenses with details including categories, split information, and timestamps."
           },
           "response": []
         },
         {
-          "name": "Update Expense - Change Petrol to ₹350",
+          "name": "Create New Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"2400\",\n  \"description\": \"Team Lunch at Pizza Place\",\n  \"paid_by\": \"Shantanu\",\n  \"split_with\": [\"Sanket\", \"Om\"],\n  \"split_type\": \"equal\",\n  \"category\": \"Food\"\n}"
+            },
+            "url": "{{BASE_URL}}/api/expenses",
+            "description": "Create a new expense. The system automatically tracks people mentioned in expenses."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Expense",
           "request": {
             "method": "PUT",
             "header": [
@@ -123,153 +78,219 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/expenses/UPDATE_WITH_ACTUAL_ID",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": \"350\",\n  \"description\": \"Petrol - Updated\"\n}"
-            }
+              "raw": "{\n  \"amount\": \"2600\",\n  \"description\": \"Team Lunch at Pizza Place (Updated)\",\n  \"category\": \"Food\"\n}"
+            },
+            "url": "{{BASE_URL}}/api/expenses/{{expense_id}}",
+            "description": "Update an existing expense. Replace {{expense_id}} with actual expense ID from Get All Expenses."
           },
           "response": []
         },
         {
-          "name": "Delete Expense - Remove Pizza",
+          "name": "Delete Expense",
           "request": {
             "method": "DELETE",
-            "url": "{{baseUrl}}/expenses/DELETE_WITH_ACTUAL_ID"
+            "header": [],
+            "url": "{{BASE_URL}}/api/expenses/{{expense_id}}",
+            "description": "Delete an expense. Replace {{expense_id}} with actual expense ID."
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Expense management endpoints with CRUD operations"
     },
     {
-      "name": "Settlements & People",
+      "name": "👥 People",
       "item": [
         {
           "name": "Get All People",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/people"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Current Balances",
-          "request": {
-            "method": "GET",
-            "url": "{{baseUrl}}/balances"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Settlement Summary",
-          "request": {
-            "method": "GET",
-            "url": "{{baseUrl}}/settlements"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Dashboard Stats",
-          "request": {
-            "method": "GET",
-            "url": "{{baseUrl}}/stats"
+            "header": [],
+            "url": "{{BASE_URL}}/api/people",
+            "description": "Get all people tracked in the system with their total payments and amounts owed."
           },
           "response": []
         }
-      ]
+      ],
+      "description": "People management - automatically populated from expenses"
     },
     {
-      "name": "Edge Cases & Validation",
+      "name": "⚖️ Balances",
       "item": [
         {
-          "name": "Add Expense - Invalid (negative amount)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"-50\",\n  \"description\": \"Invalid expense\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"equal\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Add Expense - Invalid (empty description)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"100\",\n  \"description\": \"\",\n  \"paid_by\": \"Shantanu\",\n  \"split_type\": \"equal\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Add Expense - Invalid (missing paid_by)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"100\",\n  \"description\": \"Missing paid_by\",\n  \"split_type\": \"equal\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Non-existent Expense",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/expenses/00000000-0000-0000-0000-000000000000",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"200\",\n  \"description\": \"Updated expense\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Non-existent Expense",
-          "request": {
-            "method": "DELETE",
-            "url": "{{baseUrl}}/expenses/00000000-0000-0000-0000-000000000000"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Balances - With No Expenses",
+          "name": "Get All Balances",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/balances"
+            "header": [],
+            "url": "{{BASE_URL}}/api/balances",
+            "description": "Get current balances for all people showing who owes money and who is owed money."
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Balance calculations showing net amounts owed/owing"
+    },
+    {
+      "name": "🔄 Settlements",
+      "item": [
+        {
+          "name": "Get Settlement Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{BASE_URL}}/api/settlements",
+            "description": "Get optimized settlement transactions to minimize the number of payments needed to settle all balances."
+          },
+          "response": []
+        }
+      ],
+      "description": "Smart settlement recommendations using greedy optimization algorithm"
+    },
+    {
+      "name": "📈 Analytics",
+      "item": [
+        {
+          "name": "Get Analytics Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{BASE_URL}}/api/analytics",
+            "description": "Get comprehensive analytics including category breakdown, monthly spending, top expenses, and individual spending patterns."
+          },
+          "response": []
+        }
+      ],
+      "description": "Advanced analytics and insights"
+    },
+    {
+      "name": "🧪 Test Scenarios",
+      "item": [
+        {
+          "name": "Scenario 1: Add Food Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"1800\",\n  \"description\": \"Dinner at Spice Garden\",\n  \"paid_by\": \"Sanket\",\n  \"split_with\": [\"Shantanu\", \"Om\"],\n  \"split_type\": \"equal\",\n  \"category\": \"Food\"\n}"
+            },
+            "url": "{{BASE_URL}}/api/expenses",
+            "description": "Add a food expense split equally among three people"
+          },
+          "response": []
+        },
+        {
+          "name": "Scenario 2: Add Travel Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"4500\",\n  \"description\": \"Flight Tickets Booking\",\n  \"paid_by\": \"Om\",\n  \"split_with\": [\"Shantanu\", \"Sanket\"],\n  \"split_type\": \"equal\",\n  \"category\": \"Travel\"\n}"
+            },
+            "url": "{{BASE_URL}}/api/expenses",
+            "description": "Add a travel expense with higher amount"
+          },
+          "response": []
+        },
+        {
+          "name": "Scenario 3: Add Utility Bill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"2200\",\n  \"description\": \"Internet Bill - Monthly\",\n  \"paid_by\": \"Shantanu\",\n  \"split_with\": [\"Sanket\", \"Om\"],\n  \"split_type\": \"equal\",\n  \"category\": \"Utilities\"\n}"
+            },
+            "url": "{{BASE_URL}}/api/expenses",
+            "description": "Add a utility expense"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Complete Flow",
+          "item": [
+            {
+              "name": "1. Check Initial State",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{BASE_URL}}/api/dashboard-stats",
+                "description": "Check dashboard stats before adding expenses"
+              },
+              "response": []
+            },
+            {
+              "name": "2. Add Test Expense",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": \"3300\",\n  \"description\": \"Weekend Getaway Accommodation\",\n  \"paid_by\": \"Sanket\",\n  \"split_with\": [\"Shantanu\", \"Om\"],\n  \"split_type\": \"equal\",\n  \"category\": \"Travel\"\n}"
+                },
+                "url": "{{BASE_URL}}/api/expenses",
+                "description": "Add a test expense"
+              },
+              "response": []
+            },
+            {
+              "name": "3. Check Updated Balances",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{BASE_URL}}/api/balances",
+                "description": "Check how balances changed after adding expense"
+              },
+              "response": []
+            },
+            {
+              "name": "4. Get Settlement Recommendations",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{BASE_URL}}/api/settlements",
+                "description": "See updated settlement recommendations"
+              },
+              "response": []
+            },
+            {
+              "name": "5. Check Analytics",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{BASE_URL}}/api/analytics",
+                "description": "View updated analytics with new expense"
+              },
+              "response": []
+            }
+          ],
+          "description": "Complete flow testing - demonstrates the entire system workflow"
+        }
+      ],
+      "description": "Pre-configured test scenarios to demonstrate system functionality"
     }
   ]
 }
