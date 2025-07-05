@@ -14,7 +14,7 @@
   "variable": [
     {
       "key": "BASE_URL",
-      "value": "https://your-replit-app.replit.app",
+      "value": "http://localhost:3000",
       "type": "string",
       "description": "Base URL of the deployed API"
     }
